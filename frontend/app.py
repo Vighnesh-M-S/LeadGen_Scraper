@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import requests
+
+API_URL = "http://localhost:8000/enrich"
 
 st.set_page_config(page_title="Lead Selector", layout="wide")
 
@@ -74,3 +77,30 @@ if not combined_df.empty:
         st.info("✅ Select one or more leads to enrich.")
 else:
     st.info("Upload a CSV or add at least one manual lead to get started.")
+
+# 🔁 After "🚀 Enrich Selected Leads" button is clicked
+if "to_enrich" in st.session_state:
+    leads_to_enrich = st.session_state["to_enrich"]
+
+    st.markdown("## 🚀 Enriching Selected Leads")
+    with st.spinner("Enriching... please wait"):
+        try:
+            response = requests.post(API_URL, json=leads_to_enrich)
+            if response.status_code == 200:
+                enriched_data = response.json()
+                df_enriched = pd.DataFrame(enriched_data)
+
+                st.success("✅ Enrichment Complete")
+                st.dataframe(df_enriched, use_container_width=True)
+
+                # Optional: Allow CSV download
+                st.download_button(
+                    "📥 Download Enriched Leads",
+                    df_enriched.to_csv(index=False),
+                    "enriched_leads.csv",
+                    "text/csv"
+                )
+            else:
+                st.error(f"❌ API returned {response.status_code}: {response.text}")
+        except Exception as e:
+            st.error(f"❌ Request failed: {e}")
