@@ -91,16 +91,103 @@ if "to_enrich" in st.session_state:
                 df_enriched = pd.DataFrame(enriched_data)
 
                 st.success("✅ Enrichment Complete")
-                st.dataframe(df_enriched, use_container_width=True)
 
-                # Optional: Allow CSV download
+                # Show basic dataframe
+                st.subheader("📊 Enriched Lead Table (with Hover Info)")
+
+                # Inject CSS for hover tooltips
+                hover_css = """
+                <style>
+                    .lead-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 2rem;
+                    }
+                    .lead-table th, .lead-table td {
+                        border: 1px solid #ccc;
+                        padding: 8px;
+                        text-align: left;
+                        font-size: 13px;
+                    }
+                    .hover-container {
+                        position: relative;
+                        display: inline-block;
+                        cursor: pointer;
+                    }
+                    .hover-container .hover-card {
+                        visibility: hidden;
+                        width: 280px;
+                        background-color: #f9f9f9;
+                        color: #333;
+                        text-align: left;
+                        border-radius: 10px;
+                        border: 1px solid #ccc;
+                        padding: 10px;
+                        position: absolute;
+                        z-index: 1;
+                        bottom: 125%;
+                        left: 50%;
+                        margin-left: -140px;
+                        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+                        white-space: normal;
+                    }
+                    .hover-container:hover .hover-card {
+                        visibility: visible;
+                    }
+                </style>
+                """
+
+                st.markdown(hover_css, unsafe_allow_html=True)
+
+                # Display all columns from the enriched data
+                all_columns = df_enriched.columns.tolist()
+
+                table_html = "<table class='lead-table'><thead><tr>"
+                for col in all_columns:
+                    table_html += f"<th>{col}</th>"
+                table_html += "</tr></thead><tbody>"
+
+                # Add data rows with hover on "Company"
+                for _, row in df_enriched.iterrows():
+                    table_html += "<tr>"
+                    for col in all_columns:
+                        cell_data = str(row.get(col, ""))
+                        if col == "Company":
+                            # Build hover card content
+                            hover_card = f"""
+                                <b>Industry:</b> {row.get('Industry', 'N/A')}<br>
+                                <b>Revenue:</b> {row.get('Revenue', 'N/A')}<br>
+                                <b>Employees:</b> {row.get('Employees_Count', 'N/A')}<br>
+                                <b>Owner:</b> {row.get('Owner_First_Name', '')} {row.get('Owner_Last_Name', '')}<br>
+                                <b>Email:</b> {row.get('Owner_Email', 'N/A')}
+                            """
+                            cell_html = f"""
+                            <div class="hover-container">{cell_data}
+                                <div class="hover-card">{hover_card}</div>
+                            </div>
+                            """
+                        else:
+                            cell_html = cell_data
+                        table_html += f"<td>{cell_html}</td>"
+                    table_html += "</tr>"
+                table_html += "</tbody></table>"
+
+                st.markdown(table_html, unsafe_allow_html=True)
+
+
+                # Optional: Download enriched CSV
                 st.download_button(
                     "📥 Download Enriched Leads",
                     df_enriched.to_csv(index=False),
                     "enriched_leads.csv",
                     "text/csv"
                 )
+
             else:
                 st.error(f"❌ API returned {response.status_code}: {response.text}")
+
         except Exception as e:
             st.error(f"❌ Request failed: {e}")
+
+
+            
