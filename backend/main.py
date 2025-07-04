@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-from typing import List
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 
 from .enrichment import enrich_lead
-from .models import LeadInput, LeadEnriched
+from .models import LeadInput, LeadEnriched, DecisionMaker, CompanyProfile
+from .page import deep_search
 
 app = FastAPI()
 
@@ -24,3 +25,9 @@ def root():
 def enrich_leads(leads: List[LeadInput]):
     enriched = [enrich_lead(lead.dict()) for lead in leads]
     return enriched
+
+@app.get("/company", response_model=CompanyProfile)
+def get_company_profile(name: str):
+    lead = {"Company": name}
+    detail = deep_search(lead)
+    return detail

@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
 
 class LeadInput(BaseModel):
     Company: str
@@ -36,3 +36,57 @@ class LeadEnriched(BaseModel):
     Owner_Email: Optional[str]
     Source: Optional[str]
     Confidence_Score: Optional[int]
+
+class DecisionMaker(BaseModel):
+    name: str
+    title: str
+
+class CompanyProfile(BaseModel):
+    # 🔹 Core Company Info
+    Company: str
+    Website: HttpUrl
+    Industry: str
+    Year_Founded: int
+    Company_Type: str
+    Street: str
+    City: str
+    State: str
+    ZIP: int
+    Company_Phone: str
+    Company_Email: str
+
+    # 📈 Business Metrics
+    Revenue: str
+    Employees_Count: int
+    Growth_Rate: str
+    Funding_Amount: str
+    Valuation: str
+    Tech_Stack: List[str]
+    Traffic: str
+
+    # 🧑‍💼 Key People
+    CEO_Name: str
+    CEO_Title: str
+    CEO_LinkedIn: HttpUrl
+    CEO_Email: str
+    CEO_Phone: str
+    Decision_Makers: List[DecisionMaker]
+
+    # 🧪 Lead Qualification Signals
+    Business_Model: str
+    Customer_Segments: str
+    Hiring_Activity: str
+    Recent_Funding: str
+    Job_Openings: int
+
+    # 🛰️ Social & Web Presence
+    Company_LinkedIn: HttpUrl
+    Twitter: HttpUrl
+    YouTube: HttpUrl
+    Glassdoor_Rating: float
+    BBB_Rating: str
+    Customer_Reviews: str
+
+    # Meta
+    Source: str
+    Confidence_Score: int
