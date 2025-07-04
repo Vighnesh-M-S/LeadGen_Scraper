@@ -3,7 +3,7 @@ from typing import Optional, List
 
 class LeadInput(BaseModel):
     Company: str
-    Website: Optional[str] = None
+    Website: Optional[str]
     Industry: Optional[str] = None
     Address: Optional[str] = None
     BBB_Rating: Optional[str] = Field(None, alias="BBB Rating")
